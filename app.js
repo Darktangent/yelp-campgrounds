@@ -3,11 +3,13 @@ const path = require('path');
 const mongoose = require('mongoose');
 const ejsMate = require('ejs-mate');
 const Joi = require('joi');
-const { campgroundSchema } = require('./schemas');
+const { campgroundSchema, reviewSchema } = require('./schemas');
+const { Review } = require('./models/review');
 const catchAsync = require('./utils/catchAsync');
 const methodOverride = require('method-override');
 const Campground = require('./models/campground');
 const ExpressError = require('./utils/ExpressError');
+const campground = require('./models/campground');
 
 // mongoose
 
@@ -45,6 +47,17 @@ const validateCampground = (req, res, next) => {
 		next();
 	}
 };
+const validateReview = (req, res, next) => {
+	const { error } = reviewSchema.validate(req.body);
+
+	if (error) {
+		const msg = error.details.map((el) => el.message).join(',');
+
+		throw new ExpressError(msg, 400);
+	} else {
+		next();
+	}
+};
 // routes
 app.get('/', (req, res) => {
 	res.render('home');
@@ -64,7 +77,7 @@ app.get(
 	'/campgrounds/:id',
 	catchAsync(async (req, res) => {
 		const { id } = req.params;
-		const camp = await Campground.findById(id);
+		const camp = await Campground.findById(id).populate('reviews');
 		res.render('campgrounds/show', { camp });
 	})
 );
@@ -112,6 +125,19 @@ app.delete('/campgrounds/:id', async (req, res) => {
 		next(err);
 	}
 });
+// review
+app.post(
+	'/campgrounds/:id/reviews',
+	validateReview,
+	catchAsync(async (req, res, next) => {
+		const camp = await Campground.findById(req.params.id);
+		const review = await new Review(req.body.review);
+		camp.reviews.push(review);
+		await review.save();
+		await camp.save();
+		res.redirect(`/campgrounds/${camp._id}`);
+	})
+);
 app.all('*', (req, res, next) => {
 	next(new ExpressError('Page Not found', 404));
 });

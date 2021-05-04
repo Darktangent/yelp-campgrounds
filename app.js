@@ -18,6 +18,7 @@ mongoose
 		useNewUrlParser: true,
 		useCreateIndex: true,
 		useUnifiedTopology: true,
+		useFindAndModify: false,
 	})
 	.then(() => {
 		console.log('Mongo Connection established');
@@ -136,6 +137,17 @@ app.post(
 		await review.save();
 		await camp.save();
 		res.redirect(`/campgrounds/${camp._id}`);
+	})
+);
+app.delete(
+	'/campgrounds/:campId/reviews/:rId',
+
+	catchAsync(async (req, res, next) => {
+		const { campId, rId } = req.params;
+		await Campground.findByIdAndUpdate(campId, { $pull: { reviews: rId } });
+		await Review.findByIdAndDelete(rId);
+
+		res.redirect(`/campgrounds/${campId}`);
 	})
 );
 app.all('*', (req, res, next) => {

@@ -1,3 +1,7 @@
+if (process.env.NODE_ENV !== 'production') {
+	require('dotenv').config();
+}
+
 const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
@@ -38,7 +42,7 @@ app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')));
 
 const sessionConfig = {
-	secret: '********',
+	secret: '****************',
 	resave: false,
 	saveUninitialized: true,
 	cookie: {
@@ -61,7 +65,6 @@ passport.deserializeUser(User.deserializeUser());
 app.use((req, res, next) => {
 	console.log(req.session);
 	res.locals.currentUser = req.user;
-	console.log(req.user);
 	res.locals.success = req.flash('success');
 	res.locals.error = req.flash('error');
 	next();

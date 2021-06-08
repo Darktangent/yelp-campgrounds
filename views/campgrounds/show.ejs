@@ -3,7 +3,6 @@
 
 <div class="row">
 	<div class="col-6">
-		<div id="map" style="width: 400px; height: 300px"></div>
 		<div id="campgroundCarousel" class="carousel slide" data-ride="carousel">
 			<div class="carousel-inner">
 				<% campground.images.forEach((img, i) => { %>
@@ -66,6 +65,7 @@
 		</div>
 	</div>
 	<div class="col-6">
+		<div id="map"></div>
 		<% if(currentUser){ %>
 		<h2>Leave a Review</h2>
 		<form
@@ -120,7 +120,7 @@
 				<p class="starability-result" data-rating="<%=review.rating%>">
 					Rated: <%= review.rating %> stars
 				</p>
-				<!-- <h6 class="card-subtitle mb-2 text-muted">By <%= review.author.username%></h6> -->
+
 				<p class="card-text">Review: <%= review.body %></p>
 				<% if( currentUser && review.author.equals(currentUser._id)) {%>
 				<form
@@ -129,6 +129,8 @@
 				>
 					<button class="btn btn-sm btn-danger">Delete</button>
 				</form>
+				<% } %> <% if(!currentUser) {%>
+				<p class="card-text">Please login to leave a review</p>
 				<% } %>
 			</div>
 		</div>
